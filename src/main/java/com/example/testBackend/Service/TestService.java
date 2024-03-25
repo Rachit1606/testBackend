@@ -20,8 +20,8 @@ public class TestService implements ITestService {
         return testRepository.findAll();
     }
     @Override
-    public List<Test> getAllTestsByUserId(String userId) {
-        return testRepository.findAllByUserId(userId);
+    public List<Test> getAllTestsByCourseId(String courseId) {
+        return testRepository.findByCourseId(courseId);
     }
 
     @Override

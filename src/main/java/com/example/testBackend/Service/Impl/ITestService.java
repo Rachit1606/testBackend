@@ -9,7 +9,7 @@ public interface ITestService {
     List<Test> getAllTests();
 
     Optional<Test> getTestById(String id);
-    List<Test> getAllTestsByUserId(String userId);
+    List<Test> getAllTestsByCourseId(String courseId);
 
     List<Test> getAllByUserAndCourse(String userId, String courseId);
 

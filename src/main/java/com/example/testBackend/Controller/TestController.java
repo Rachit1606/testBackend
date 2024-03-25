@@ -59,12 +59,12 @@ public class TestController {
         return res;
     }
 
-    @GetMapping("/getAll/{userId}")
-    public ResponseEntity getAllTestsByUserId(@PathVariable String userId)
+    @GetMapping("/getAll/{courseId}")
+    public ResponseEntity getAllTestsByCourseId(@PathVariable String courseId)
     {
         ResponseEntity  res = null;
         try{
-            List<Test> tests = testService.getAllTestsByUserId(userId);
+            List<Test> tests = testService.getAllTestsByCourseId(courseId);
             res = ResponseEntity.status(HttpStatus.OK).body(tests);
         }catch ( Exception e)
         {

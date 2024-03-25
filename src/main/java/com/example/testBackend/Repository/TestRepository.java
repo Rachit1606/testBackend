@@ -12,4 +12,6 @@ public interface TestRepository extends MongoRepository<Test, String> {
     List<Test> findAllByUserId(String userId);
 
     List<Test> findByUserIdAndCourseId(String userId, String courseId);
+
+    List<Test> findByCourseId(String courseId);
 }
