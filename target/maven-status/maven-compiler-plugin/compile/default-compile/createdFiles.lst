@@ -20,5 +20,6 @@ com\example\testBackend\Entities\Attempt.class
 com\example\testBackend\Entities\FinishTestRequest.class
 com\example\testBackend\Controller\QuestionController.class
 com\example\testBackend\Entities\LaunchTestRequest.class
+com\example\testBackend\Entities\LaunchTestResponse.class
 com\example\testBackend\Repository\AttemptRepository.class
 com\example\testBackend\Controller\TestController.class
