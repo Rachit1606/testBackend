@@ -9,5 +9,8 @@ import java.util.List;
 @Service
 public interface IAttemptService {
     public void updateAttemptAndSaveResult(Attempt attempt);
-    public Attempt createAttempt(String userId, String testId, List<AttemptedQuestion> attemptedQuestions);
+
+    public Attempt createAttempt(String userId, String testId, String courseId, List<AttemptedQuestion> attemptedQuestions);
+
+    public List<Attempt> getAttempts(String studentId, String courseId );
 }

@@ -7,11 +7,9 @@ import com.example.testBackend.Service.Impl.IQuestionService;
 import com.example.testBackend.Service.Impl.ITestService;
 import com.example.testBackend.Service.TestService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,11 +41,13 @@ public class AttemptController {
             attemptedQuestion.setQuestionId(questionId);
             attemptedQuestions.add(attemptedQuestion);
         }
-
-        Attempt attempt = attemptService.createAttempt(request.getUserId(), request.getTestId(), attemptedQuestions);
-
+        Attempt attempt = attemptService.createAttempt(request.getUserId(), request.getTestId(), request.getCourseId(), attemptedQuestions);
         attempt.setAttemptedQuestions(attemptedQuestions);
-        return ResponseEntity.ok(selectedQuestions);
+        LaunchTestResponse response = new LaunchTestResponse();
+
+        response.setQuestionsList(selectedQuestions);
+        response.setAttemptId(attempt.getAttemptId());
+        return ResponseEntity.ok(response);
     }
 
 
@@ -58,6 +58,35 @@ public class AttemptController {
         attempt.setAttemptedQuestions(attemptedQuestions);
         attemptService.updateAttemptAndSaveResult(attempt);
         return ResponseEntity.ok("Test attempt updated successfully");
+    }
+
+    @GetMapping("/getAttempts/{studentId}/{courseId}")
+    public ResponseEntity<?> getAttemptsList(@PathVariable String studentId, @PathVariable String courseId)
+    {
+        ResponseEntity res = null;
+        try {
+            List<Attempt> attempts = attemptService.getAttempts(studentId,courseId);
+            res = ResponseEntity.status(HttpStatus.OK).body(attempts);
+        } catch (Exception e) {
+            ExceptionResponse ex = new ExceptionResponse(e.toString());
+            res = ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex);
+        }
+        return res;
+    }
+
+    @GetMapping("/getAttempt/{attemptId}")
+    public  ResponseEntity<?> getAttemptById(@PathVariable String attemptId)
+    {
+        ResponseEntity res = null;
+        try {
+            Attempt attempt = attemptRepository.findById(attemptId).orElse(null);
+            res = ResponseEntity.status(HttpStatus.OK).body(attempt);
+        } catch (Exception e) {
+            ExceptionResponse ex = new ExceptionResponse(e.toString());
+            res = ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex);
+        }
+        return res;
+
     }
 
 }

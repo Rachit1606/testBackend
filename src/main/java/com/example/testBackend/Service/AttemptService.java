@@ -22,10 +22,11 @@ public class AttemptService implements IAttemptService {
     private QuestionRepository questionRepository;
 
     @Override
-    public Attempt createAttempt(String userId, String testId, List<AttemptedQuestion> attemptedQuestions) {
+    public Attempt createAttempt(String userId, String testId, String courseId, List<AttemptedQuestion> attemptedQuestions) {
         Attempt attempt = new Attempt();
         attempt.setStudentId(userId);
         attempt.setTestId(testId);
+        attempt.setCourseId(courseId);
         attempt.setAttemptedQuestions(attemptedQuestions);
         // You can set other attributes of the attempt if needed
         return attemptRepository.save(attempt);
@@ -94,6 +95,10 @@ public class AttemptService implements IAttemptService {
         } else {
             return "Fail";
         }
+    }
+    @Override
+    public List<Attempt> getAttempts(String studentId, String courseId) {
+        return attemptRepository.findByStudentIdAndCourseId(studentId,courseId);
     }
 
 }

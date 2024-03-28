@@ -6,12 +6,12 @@ import com.example.testBackend.Repository.QuestionRepository;
 import com.example.testBackend.Service.Impl.IQuestionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.aggregation.Aggregation;
-import org.springframework.data.mongodb.core.aggregation.AggregationResults;
-import org.springframework.data.mongodb.core.aggregation.MatchOperation;
-import org.springframework.data.mongodb.core.aggregation.SampleOperation;
+import org.springframework.data.mongodb.core.aggregation.*;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -52,20 +52,64 @@ public class QuestionService implements IQuestionService {
 
     @Override
     public List<Question> getRandomQuestions(LaunchTestRequest request) {
-        MatchOperation matchOperation = Aggregation.match(
-                Criteria.where("courseId").is(request.getCourseId())
-                        .and("chapterId").in(request.getChapterIds())
-                        .and("subchapterId").in(request.getSubchapterIds())
-                        .and("difficulty").lte(request.getDifficultyLevel())
-        );
+        int numberOfQuestions = request.getNumberOfQuestions();
+        int easyPercentage = 50;
+        int mediumPercentage = 30;
+        int hardPercentage = 20;
 
-        SampleOperation sampleOperation = Aggregation.sample(request.getNumberOfQuestions());
+        int difficultyLevel = request.getDifficultyLevel();
 
-        Aggregation aggregation = Aggregation.newAggregation(matchOperation, sampleOperation);
+        // Adjust percentages based on difficulty level
+        easyPercentage -= (difficultyLevel - 1) * 10;
+        mediumPercentage += (difficultyLevel - 1) * 5;
+        hardPercentage += (difficultyLevel - 1) * 5;
 
-        AggregationResults<Question> aggregationResults = mongoTemplate.aggregate(aggregation, "questions", Question.class);
+        // Calculate the number of questions for each difficulty level
+        int easyQuestions = Math.round(numberOfQuestions * easyPercentage / 100.0f);
+        int mediumQuestions = Math.round(numberOfQuestions * mediumPercentage / 100.0f);
+        int hardQuestions = numberOfQuestions - easyQuestions - mediumQuestions;
 
-        return aggregationResults.getMappedResults();
+        // Ensure there are no negative values
+        easyQuestions = Math.max(0, easyQuestions);
+        mediumQuestions = Math.max(0, mediumQuestions);
+        hardQuestions = Math.max(0, hardQuestions);
+
+        // Fetch all questions matching the provided criteria
+        List<Question> allQuestions = questionRepository.findByCourseIdAndChapterIdInAndSubchapterIdIn(
+                request.getCourseId(), request.getChapterIds(), request.getSubchapterIds());
+
+        // Shuffle the list of questions to randomize the order
+        Collections.shuffle(allQuestions);
+
+        // Create lists to hold selected questions for each difficulty level
+        List<Question> selectedEasyQuestions = new ArrayList<>();
+        List<Question> selectedMediumQuestions = new ArrayList<>();
+        List<Question> selectedHardQuestions = new ArrayList<>();
+
+        // Iterate through all questions and select required number of questions for each difficulty level
+        for (Question question : allQuestions) {
+            if (easyQuestions > 0 && question.getDifficulty().equals("easy")) {
+                selectedEasyQuestions.add(question);
+                easyQuestions--;
+            } else if (mediumQuestions > 0 && question.getDifficulty().equals("medium")) {
+                selectedMediumQuestions.add(question);
+                mediumQuestions--;
+            } else if (hardQuestions > 0 && question.getDifficulty().equals("hard")) {
+                selectedHardQuestions.add(question);
+                hardQuestions--;
+            }
+
+            // Stop the loop if required number of questions for each difficulty level is selected
+            if (easyQuestions == 0 && mediumQuestions == 0 && hardQuestions == 0) {
+                break;
+            }
+        }
+        List<Question> selectedQuestions = new ArrayList<>();
+        selectedQuestions.addAll(selectedEasyQuestions);
+        selectedQuestions.addAll(selectedMediumQuestions);
+        selectedQuestions.addAll(selectedHardQuestions);
+        Collections.shuffle(selectedQuestions);
+        return selectedQuestions;
     }
     @Override
     public List<Question> getAllQuestionsByUserAndCourse(String userId, String courseId) {

@@ -17,6 +17,7 @@ public class Attempt {
     private String attemptId;
     private String testId;
     private String studentId;
+    private String courseId;
     private List<AttemptedQuestion> attemptedQuestions;
     private int totalMarks;
     private int obtainedMarks;
