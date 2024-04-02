@@ -73,7 +73,7 @@ public class AttemptService implements IAttemptService {
                 if (isAnswerCorrect(question, attemptedQuestion)) {
                     obtainedMarks += question.getPositiveMarks();
                 } else {
-                    obtainedMarks += question.getNegativeMarks();
+                    obtainedMarks -= question.getNegativeMarks();
                 }
             }
         }
